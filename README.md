@@ -54,6 +54,7 @@ A IA foi capacitada com duas novas ferramentas para responder dúvidas financeir
 │   ├── build.gradle                 <-- Configuração de dependências
 │   └── README.md                    <-- Documentação técnica do módulo
 └── README.md                        <-- Guia geral do repositório
+```
 
 🧪 Como Executar e Testar
 Navegue até a pasta do projeto:
