@@ -1,136 +1,100 @@
-# DIO Spring Boot Learning Track
+# 🚀 Desafio de Projeto: API de Orçamento Inteligente com Spring AI
 
-This repository contains a DIO Spring Boot learning track organized as incremental modules.
-
-The track starts with architecture foundations and progressively moves through web APIs, data access, security, service integration, and AI-enabled workflows.
-
-<img width="2752" height="1536" alt="unnamed" src="https://github.com/user-attachments/assets/a7bcbe19-4d0c-4395-8696-8c64be22764f" />
-
-## Modules
-
-- [`00-domain-driven-design`](00-domain-driven-design/README.md)  
-  DDD foundations with a catalog domain and no web layer.
-- [`01-spring-web`](01-spring-web/README.md)  
-  REST API design with Spring Web and API documentation with Spring REST Docs.
-- [`02-spring-data`](02-spring-data/README.md)  
-  Data access in a multi-context application using MySQL, MongoDB, Redis, and PostgreSQL.
-- [`03-spring-security`](03-spring-security/README.md)  
-  Authentication and authorization with Spring Security in a proposal management API.
-- [`04-spring-cloud-openfeign`](04-spring-cloud-openfeign/README.md)  
-  External service integration (KYC/AML) using Spring Cloud OpenFeign and resilience patterns.
-- [`05-spring-ai`](05-spring-ai/README.md)  
-  Final project using Spring AI for speech-to-text, tool calling, and text-to-speech.
-
-## Recommended Study Order
-
-1. [`00-domain-driven-design`](00-domain-driven-design/README.md)
-2. [`01-spring-web`](01-spring-web/README.md)
-3. [`02-spring-data`](02-spring-data/README.md)
-4. [`03-spring-security`](03-spring-security/README.md)
-5. [`04-spring-cloud-openfeign`](04-spring-cloud-openfeign/README.md)
-6. [`05-spring-ai`](05-spring-ai/README.md)
+Projeto desenvolvido como desafio prático do módulo de Spring Boot e Inteligência Artificial da **DIO (Digital Innovation One)**, contido na pasta [`/05-spring-ai`](./05-spring-ai).
 
 ---
 
-## Shared Architecture Guide
+## 📌 Visão Geral do Projeto
 
-The sections below consolidate architecture topics that are intentionally reused across modules.
+A aplicação é uma **API Inteligente de Gestão Financeira** que processa comandos do usuário enviando entradas via **áudio ou texto**. O sistema utiliza o **Spring AI** para:
+1. Converter arquivos de áudio para texto (Transcrição).
+2. Compreender a intenção do usuário utilizando modelos de linguagem (LLM).
+3. Executar funções reais do sistema (*Tool Calling / Function Calling*).
+4. Gravar ou consultar transações e gerar respostas contextualizadas (com geração opcional de voz em áudio MP3).
 
-### DDD Layered Architecture
+---
 
-Most modules follow the same conceptual split:
+## ✨ Melhorias e Evoluções Implementadas
+
+Com base no projeto fornecido em aula, foram implementadas as seguintes evoluções:
+
+### 1. Novas Tools de IA (`FinancialSummaryUseCase`)
+A IA foi capacitada com duas novas ferramentas para responder dúvidas financeiras diretamente:
+* **`get-total-balance`**: Consulta o total gasto e o saldo consolidado do usuário.
+* **`get-category-spending-summary`**: Permite consultar os gastos filtrados por categorias específicas (ex: `GROCERIES`, `PHARMA`, `AUTO`).
+
+### 2. Endpoint de Interação via Texto
+* Criado o endpoint **`POST /transactions/ai/text`**, permitindo enviar mensagens diretas e testar a inteligência da API sem dependência obrigatória de envio de arquivos de áudio.
+
+### 3. Validação de Dados e Respostas Amigáveis (`GlobalExceptionHandler`)
+* Adicionado tratamento com `@RestControllerAdvice` para capturar envios de arquivos de áudio vazios ou corrompidos, retornando uma resposta limpa em JSON com status **`400 Bad Request`**.
+
+### 4. Correção na Formatação de Moeda
+* Ajustada a conversão de centavos para reais na saída das transações (`TransactionOutput`), garantindo que entradas como `2590` retornem formatadas como `25.90`.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Linguagem:** Java (JDK 21+)
+* **Framework:** Spring Boot
+* **Módulo AI:** Spring AI (`ChatClient`, Tool Calling)
+* **Persistência:** Spring Data JPA
+* **Banco de Dados:** H2 (Testes/Runtime local) / MySQL
+* **Automação de Build:** Gradle
+
+---
+
+## 📂 Estrutura do Repositório
 
 ```text
-domain/          -> business model, invariants, contracts
-application/     -> use cases, orchestration, application policies
-infrastructure/  -> adapters (HTTP, persistence, external clients, framework glue)
-```
+.
+├── 05-spring-ai/                    <-- PASTA PRINCIPAL DO DESAFIO
+│   ├── src/                         <-- Código-fonte Java e Testes
+│   ├── build.gradle                 <-- Configuração de dependências
+│   └── README.md                    <-- Documentação técnica do módulo
+└── README.md                        <-- Guia geral do repositório
 
-Why this matters:
+🧪 Como Executar e Testar
+Navegue até a pasta do projeto:
 
-- `domain` stays focused on business language and rules, not framework details.
-- `application` coordinates domain behavior for specific user/business actions.
-- `infrastructure` can change (database, web transport, external APIs) without forcing core business rewrites.
+Bash
+cd 05-spring-ai
+1. Executar a Aplicação
+Bash
+# Definir a chave da OpenAI (se for utilizar a API real)
+export OPENAI_API_KEY="sua_chave_aqui"   # Linux/Mac
+$env:OPENAI_API_KEY="sua_chave_aqui"    # PowerShell Windows
 
-This separation reduces coupling and supports long-term maintainability.
+# Subir a aplicação
+./gradlew bootRun
+2. Exemplos de Requisições (cURL)
+Criar Transação (valor em centavos):
 
-### Java Class vs Java Record in Domain Modeling
+Bash
+curl -X POST http://localhost:8080/transactions \
+  -H "Content-Type: application/json" \
+  -d "{\"description\":\"Mercado do bairro\",\"category\":\"GROCERIES\",\"amount\":2590}"
+Consultar Saldo Total:
 
-A practical guideline used across the track:
+Bash
+curl http://localhost:8080/transactions/balance
+Consultar Gastos por Categoria (GROCERIES):
 
-- Use `class` for entities/aggregates that have identity and may evolve behavior over time.
-- Use `record` for immutable value objects and DTO-style transport models.
+Bash
+curl http://localhost:8080/transactions/summary/GROCERIES
+Perguntar para a IA por Texto:
 
-Design trade-offs:
+Bash
+curl -X POST http://localhost:8080/transactions/ai/text \
+  -H "Content-Type: application/json" \
+  -d "{\"message\":\"Quanto eu gastei com alimentacao?\"}"
+  
+🧠 Aprendizados
+Durante este desafio, foi possível compreender:
 
-- `class` supports richer lifecycle behavior and controlled mutation.
-- `record` reduces boilerplate and makes immutability explicit.
+A integração entre aplicações Spring Boot e LLMs utilizando o ecossistema Spring AI.
 
-This distinction improves code intent and keeps domain concepts clearer.
+O padrão de Tool Calling, onde a IA atua como orquestradora chamando métodos do próprio código Java.
 
-### Strong Typed Identifiers
-
-Instead of passing raw primitives (`UUID`, `String`) everywhere, modules wrap identifiers in explicit types such as `BookId`, `TaskId`, `ProposalId`, and `TransactionId`.
-
-Benefits:
-
-- Better compile-time safety (fewer accidental ID mix-ups).
-- More expressive signatures (`findById(TaskId id)` communicates intent).
-- Cleaner evolution path for ID rules and validation.
-
-### Repository Pattern
-
-The repository contract belongs to the business side, while technology-specific implementations stay in infrastructure.
-
-Pattern used in this repository:
-
-- Domain contract: `XxxRepository` in `domain/`.
-- Adapter implementation: JPA/in-memory/etc. in `infrastructure/`.
-
-Architectural impact:
-
-- Business logic depends on abstractions, not persistence frameworks.
-- Switching storage technology becomes an adapter change, not a domain rewrite.
-- Unit testing use cases becomes simpler with fake/mock repositories.
-
-### Use Cases and Clean Architecture
-
-Each use case models one business capability (for example, create task, list proposals, analyze company risk).
-
-Common flow:
-
-1. Controller/listener receives an external request.
-2. It calls one application use case.
-3. The use case orchestrates domain objects and repository/gateway contracts.
-4. Infrastructure adapters handle persistence or external integrations.
-
-Why this is important:
-
-- Strong single-responsibility boundaries.
-- Easier testability and refactoring.
-- Better readability of business workflows.
-
-### Docker Compose Support in Development
-
-Several modules include `compose.yml` and Spring Boot Docker Compose support.
-
-Typical local development role:
-
-- Start required infra services (database/cache/message dependencies).
-- Keep local setup reproducible for all students.
-- Reduce onboarding friction by standardizing environment dependencies.
-
-Note: exact behavior can vary by module configuration and runtime profile.
-
----
-
-## Quick Start
-
-Choose a module and run its local instructions:
-
-```bash
-cd 01-spring-web
-./gradlew test
-```
-
-For module-specific details, always check each module README from the links above.
+A separação de responsabilidades entre regras de negócio, persistência e exposição REST.
