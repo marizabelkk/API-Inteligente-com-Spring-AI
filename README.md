@@ -58,39 +58,45 @@ A IA foi capacitada com duas novas ferramentas para responder dúvidas financeir
 
 🧪 Como Executar e Testar
 Navegue até a pasta do projeto:
-
+```text
 Bash
 cd 05-spring-ai
+```
 1. Executar a Aplicação
+```text
 Bash
 # Definir a chave da OpenAI (se for utilizar a API real)
 export OPENAI_API_KEY="sua_chave_aqui"   # Linux/Mac
 $env:OPENAI_API_KEY="sua_chave_aqui"    # PowerShell Windows
-
 # Subir a aplicação
 ./gradlew bootRun
+```
 2. Exemplos de Requisições (cURL)
 Criar Transação (valor em centavos):
-
+```text
 Bash
 curl -X POST http://localhost:8080/transactions \
   -H "Content-Type: application/json" \
   -d "{\"description\":\"Mercado do bairro\",\"category\":\"GROCERIES\",\"amount\":2590}"
+```
 Consultar Saldo Total:
-
+```text
 Bash
 curl http://localhost:8080/transactions/balance
-Consultar Gastos por Categoria (GROCERIES):
+```
 
+Consultar Gastos por Categoria (GROCERIES):
+```text
 Bash
 curl http://localhost:8080/transactions/summary/GROCERIES
+```
 Perguntar para a IA por Texto:
-
+```text
 Bash
 curl -X POST http://localhost:8080/transactions/ai/text \
   -H "Content-Type: application/json" \
   -d "{\"message\":\"Quanto eu gastei com alimentacao?\"}"
-  
+  ```
 🧠 Aprendizados
 Durante este desafio, foi possível compreender:
 
