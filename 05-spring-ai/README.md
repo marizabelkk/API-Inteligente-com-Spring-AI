@@ -1,85 +1,41 @@
-# DIO Spring Boot - Final Project 05: Spring AI (budgeting)
+# 🚀 API de Orçamento Inteligente com Spring AI
 
-## Introduction
+Projeto desenvolvido no módulo de Spring Boot e Inteligência Artificial da DIO, com evoluções focadas em **Tool Calling (Execução de Funções)**, validação de dados e novos endpoints de consulta.
 
-This final module applies Spring AI in a budgeting API while preserving the same layered architecture used across the track.
+## 📌 O que o projeto faz
+A aplicação é uma API de gerenciamento financeiro pessoal que utiliza o **Spring AI** para processar áudio e texto. A IA analisa os comandos do usuário, aciona funções reais do sistema (*Tool Calling*) para criar ou consultar transações financeiras e devolve respostas contextualizadas (inclusive em áudio MP3).
 
-The goal is to integrate AI capabilities without bypassing domain and use case boundaries.
+---
 
-## Code Context
+## ✨ Melhorias Implementadas
 
-The project processes voice commands to create and query financial transactions.
+1. **Novas Tools para a IA (`FinancialSummaryUseCase`):**
+   - `get-total-balance`: Permite que a IA consulte o saldo total e histórico do usuário.
+   - `get-category-spending-summary`: Permite consultar gastos filtrados por categoria (ex: `GROCERIES`, `PHARMA`, `AUTO`).
+   
+2. **Endpoint de Teste por Texto:**
+   - Adicionado o endpoint `POST /transactions/ai/text` para testar perguntas e interações de texto sem depender do envio de arquivos de áudio.
 
-Primary flow:
+3. **Validação e Tratamento de Erros (`GlobalExceptionHandler`):**
+   - Tratamento amigável para envio de arquivos de áudio vazios ou formatos inválidos, retornando status `400 Bad Request` em formato JSON.
 
-1. Client uploads an audio file.
-2. Audio is transcribed into text.
-3. The model selects an application tool/use case.
-4. The use case persists or queries transaction data.
-5. The final response is converted to audio.
+4. **Ajuste na Regra de Moeda:**
+   - Ajuste no DTO de resposta para converter corretamente valores inteiros em centavos para a representação em reais (ex: `2590` -> `25.90`).
 
-## Project Structure
+---
 
-- `src/main/java/dio/budgeting/domain`
-  - Domain model and repository contract.
-- `src/main/java/dio/budgeting/application`
-  - Use cases used by both REST and AI tool calling.
-- `src/main/java/dio/budgeting/infrastructure`
-  - HTTP adapters, JPA adapters, and integration glue.
+## 🛠️ Tecnologias Utilizadas
+- Java 21+ / Spring Boot 3+
+- **Spring AI** (Integração com modelos de linguagem e transcrição)
+- **Spring Data JPA** & Banco de dados H2 / MySQL
+- **Gradle**
 
-## Module-Specific Topics
+---
 
-### Speech-to-text
+## 🧪 Como Testar a Aplicação
 
-- Uses `TranscriptionModel` for audio transcription.
-- Model settings are configured in `application.properties`.
-
-### Tool calling
-
-- `ChatClient` registers use-case tools.
-- `@Tool` methods expose business capabilities to the model.
-
-### Text-to-speech
-
-- `TextToSpeechModel` produces MP3 output from final text.
-- AI endpoint returns generated audio.
-
-## Spring AI Documentation
-
-- Spring AI Reference: https://docs.spring.io/spring-ai/reference/index.html
-- ChatModel API: https://docs.spring.io/spring-ai/reference/api/chatmodel.html
-- ChatClient API: https://docs.spring.io/spring-ai/reference/api/chatclient.html
-- Tools API: https://docs.spring.io/spring-ai/reference/api/tools.html
-- Audio Transcriptions API: https://docs.spring.io/spring-ai/reference/api/audio/transcriptions.html
-- Audio Speech API: https://docs.spring.io/spring-ai/reference/api/audio/speech.html
-
-## Shared Architecture References
-
-Common architecture concepts are documented in the root README:
-
-- [DDD layers](../README.md#ddd-layered-architecture)
-- [Class vs record](../README.md#java-class-vs-java-record-in-domain-modeling)
-- [Strong typed identifiers](../README.md#strong-typed-identifiers)
-- [Repository pattern](../README.md#repository-pattern)
-- [Use cases and Clean Architecture](../README.md#use-cases-and-clean-architecture)
-- [Docker Compose support](../README.md#docker-compose-support-in-development)
-
-## How to Run
-
-Set your OpenAI API key:
-
+### 1. Criar uma Transação (Valor em Centavos)
 ```bash
-export OPENAI_API_KEY="your_api_key_here"
-```
-
-Run the application and tests:
-
-```bash
-./gradlew bootRun
-./gradlew test
-```
-
-## Notes
-
-- Educational final project focused on AI plus architectural discipline.
-- External provider integration tests may require active credentials.
+curl -X POST http://localhost:8080/transactions \
+  -H "Content-Type: application/json" \
+  -d "{\"description\":\"Mercado\",\"category\":\"GROCERIES\",\"amount\":2590}"
